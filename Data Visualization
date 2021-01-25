@@ -1,0 +1,37 @@
+library(ggplot2)
+library(dplyr)
+library(ggpmisc)
+library(gridExtra)
+
+set.seed(123)
+
+#Get data
+datafef <- read.csv(file="fefaps.csv", header = TRUE, stringsAsFactors = FALSE)
+
+#Print a Linear Model
+lm_summary <- summary(lm(formula = FEF ~ APS, data = datafef))
+print(lm_summary)
+
+#Get average and standard deviation of clusters
+fef.summary <- datafef %>%
+  group_by(APS) %>%
+  summarise(
+    sd = sd(FEF, na.rm = TRUE)
+    FEF = mean(FEF)
+  )
+
+#Make Line Plot
+fef_line <- ggplot(fef.summary, aes(x=APS, y=FEF)) + 
+  geom_point() +
+  geom_errorbar(aes(ymin=FEF-sd, ymax=FEF+sd), width=.2,
+    position=position_dodge(0.05)) +
+  stat_smooth(data = datafef, formula = y ~ x, method = "lm", fullrange = TRUE) +
+    eq.with.lhs = "italic(hat((y))~'='~",
+    aes(label = paste(..eq.label.., ..rr.label.., sep = "*plain(\",")~")),
+    parse = TRUE) +
+  ylab(expression("FEF"[25-75] * " Percent Predicted")) +
+  xlab('Mean APS of Each Cluster') +
+  theme_classic()
+
+fef_line
+  
