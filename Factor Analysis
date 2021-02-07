@@ -1,0 +1,17 @@
+library(factoextra)
+library(FactoMineR)
+
+clus <- read.csv(file="cluster.csv", header = TRUE)
+
+res.pca <- PCA(clus, graph = FALSE)
+fviz_pca_var(res.pca, col.var="contrib",
+             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+             repel = TRUE # Avoid text overlapping
+)
+
+# Contributions of variables to PC1
+fviz_contrib(res.pca, choice = "var", axes = 1, top = 25, fill = "Grey")
+
+
+# Contributions of variables to PC2
+fviz_contrib(res.pca, choice = "var", axes = 2, top = 25, fill = "Grey")
