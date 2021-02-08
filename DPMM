@@ -1,0 +1,12 @@
+import pandas as pd
+import numpy as np
+from sklearn.decomposition import PCA
+from sklearn.mixture import BayesianGaussianMixture
+
+x = pd.read_csv('allergen_clustering.csv')
+
+pca = PCA(n_components=4)
+x_reduced = pca.fit_transform(x)
+
+bgm = BayesianGaussianMixture(n_components=20, n_init=20, weight_concentration_prior_type = "dirichlet_process").fit(x_reduced)
+print(np.round(bgm.weights_, 2)
