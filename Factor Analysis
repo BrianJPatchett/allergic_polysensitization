@@ -1,17 +1,62 @@
 library(factoextra)
 library(FactoMineR)
+library(ggplot2)
+library(viridis)
 
-clus <- read.csv(file="cluster.csv", header = TRUE)
+clus <- read.csv(file="completekmc.csv", header = TRUE)
+clus$ClusterNumber <- as.factor(clus$ClusterNumber)
+clus$Season <- as.factor(clus$Season)
 
-res.pca <- PCA(clus, graph = FALSE)
-fviz_pca_var(res.pca, col.var="contrib",
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = TRUE # Avoid text overlapping
-)
+gen.pca <- PCA(clus[,1:25], graph = FALSE)
+fviz_pca_var(gen.pca, col.var="contrib",
+             repel = TRUE,
+             max.overlaps = 1) +
+  scale_color_viridis(end = 0.9,
+    option = "A")
 
-# Contributions of variables to PC1
-fviz_contrib(res.pca, choice = "var", axes = 1, top = 25, fill = "Grey")
+fviz_contrib(gen.pca, 
+             choice = "var", 
+             axes = 1, 
+             top = 25, 
+             fill = "Grey") +
+  ggtitle(label = "Contributions to the First Principle Component")
 
+fviz_contrib(gen.pca, 
+             choice = "var", 
+             axes = 2, 
+             top = 25, 
+             fill = "Grey") +
+  ggtitle(label = "Contributions to the Second Principle Component")
 
-# Contributions of variables to PC2
-fviz_contrib(res.pca, choice = "var", axes = 2, top = 25, fill = "Grey")
+superclus <- clus[-c(508, 509), ]
+sc.pca <- PCA(superclus[,1:25], graph = FALSE)
+sc <- sc.pca$x
+sc <- as.data.frame(sc)
+
+ggplot(sc) + 
+  geom_point(aes(x=PC1, y=PC2, 
+                 shape = Season, 
+                 color = ClusterNumber), 
+             size=1.5, 
+             show.legend = TRUE) +
+  geom_mark_ellipse(aes(x = PC1, y = PC2, 
+                        fill = Season, 
+                        label = Season),
+                    colour = "black",
+                    show.legend = FALSE) +
+  scale_color_viridis(discrete = TRUE,
+                      option = "A") +
+  theme(legend.position = 'none') +
+  xlab("First Principle Component") +
+  ylab("Second Principle Component") +
+  theme_classic()
+
+library(corrplot)
+corr <- read.csv(file = "clustercorr.csv", header = TRUE)
+M <- cor(corr)
+col1 <- colorRampPalette(magma(n = 100))
+corrplot(M, method = "color", 
+         order = "hclust", 
+         addrect = 3, 
+         col = colorRampPalette(magma(n=10))(100), 
+         addCoef.col = "BLACK")
