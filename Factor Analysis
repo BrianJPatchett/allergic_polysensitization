@@ -28,10 +28,9 @@ fviz_contrib(gen.pca,
              fill = "Grey") +
   ggtitle(label = "Contributions to the Second Principle Component")
 
-superclus <- clus[-c(508, 509), ]
-sc.pca <- PCA(superclus[,1:25], graph = FALSE)
-sc <- sc.pca$x
-sc <- as.data.frame(sc)
+sc.pca <- PCA(clus[,1:25], graph = FALSE)
+sc <- as.data.frame(sc.pca$x)
+sc <- sc[-c(508, 509), ]
 
 ggplot(sc) + 
   geom_point(aes(x=PC1, y=PC2, 
@@ -44,7 +43,9 @@ ggplot(sc) +
                         label = Season),
                     colour = "black",
                     show.legend = FALSE) +
-  scale_color_viridis(discrete = TRUE,
+  scale_color_viridis(begin = 0.1,
+                      end = 0.9,
+                      discrete = TRUE,
                       option = "A") +
   theme(legend.position = 'none') +
   xlab("First Principle Component") +
