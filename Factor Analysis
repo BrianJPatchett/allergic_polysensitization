@@ -14,19 +14,37 @@ fviz_pca_var(gen.pca, col.var="contrib",
   scale_color_viridis(end = 0.9,
     option = "A")
 
-fviz_contrib(gen.pca, 
+# Contributions of variables to PC1
+a <- fviz_contrib(gen.pca, 
              choice = "var", 
              axes = 1, 
              top = 25, 
              fill = "Grey") +
   ggtitle(label = "Contributions to the First Principle Component")
 
-fviz_contrib(gen.pca, 
+# Contributions of variables to PC2
+b <- fviz_contrib(gen.pca, 
              choice = "var", 
              axes = 2, 
              top = 25, 
              fill = "Grey") +
   ggtitle(label = "Contributions to the Second Principle Component")
+
+c <- fviz_contrib(gen.pca, 
+             choice = "var", 
+             axes = 3, 
+             top = 25, 
+             fill = "Grey") +
+  ggtitle(label = "Contributions to the Third Principle Component")
+
+d <- fviz_contrib(gen.pca, 
+             choice = "var", 
+             axes = 4, 
+             top = 25, 
+             fill = "Grey") +
+  ggtitle(label = "Contributions to the Fourth Principle Component")
+
+grid.arrange(a, b, c, d)
 
 sc.pca <- PCA(clus[,1:25], graph = FALSE)
 sc <- as.data.frame(sc.pca$x)
