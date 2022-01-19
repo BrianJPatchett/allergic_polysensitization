@@ -2,13 +2,18 @@ library(factoextra)
 library(FactoMineR)
 library(ggplot2)
 library(viridis)
+library(ggforce)
 
+# Load data and set proper classes for data
 clus <- read.csv(file="completekmc.csv", header = TRUE)
 clus$ClusterNumber <- as.factor(clus$ClusterNumber)
 clus$Season <- as.factor(clus$Season)
 
+# PCA for the graphs
 gen.pca <- PCA(clus[,1:25], graph = FALSE)
-fviz_pca_var(gen.pca, col.var="contrib",
+
+# Correlation Circle
+corrcircle <- fviz_pca_var(gen.pca, col.var="contrib",
              repel = TRUE,
              max.overlaps = 1) +
   scale_color_viridis(end = 0.9,
@@ -20,7 +25,7 @@ a <- fviz_contrib(gen.pca,
              axes = 1, 
              top = 25, 
              fill = "Grey") +
-  ggtitle(label = "Contributions to the First Principle Component")
+  ggtitle(label = "Contributions to the First Principal Component")
 
 # Contributions of variables to PC2
 b <- fviz_contrib(gen.pca, 
@@ -28,30 +33,31 @@ b <- fviz_contrib(gen.pca,
              axes = 2, 
              top = 25, 
              fill = "Grey") +
-  ggtitle(label = "Contributions to the Second Principle Component")
+  ggtitle(label = "Contributions to the Second Principal Component")
 
 c <- fviz_contrib(gen.pca, 
              choice = "var", 
              axes = 3, 
              top = 25, 
              fill = "Grey") +
-  ggtitle(label = "Contributions to the Third Principle Component")
+  ggtitle(label = "Contributions to the Third Principal Component")
 
 d <- fviz_contrib(gen.pca, 
              choice = "var", 
              axes = 4, 
              top = 25, 
              fill = "Grey") +
-  ggtitle(label = "Contributions to the Fourth Principle Component")
+  ggtitle(label = "Contributions to the Fourth Principal Component")
 
-grid.arrange(a, b, c, d)
+# Princomp is helpful to get the new PCA space
+sc.pca <- princomp(clus[,1:25])
+sc.df <- as.data.frame(sc.pca$x)
+labels <- clus[,26:27]
+sc <- cbind(sc.df, labels)
 
-sc.pca <- PCA(clus[,1:25], graph = FALSE)
-sc <- as.data.frame(sc.pca$x)
-sc <- sc[-c(508, 509), ]
-
-ggplot(sc) + 
-  geom_point(aes(x=PC1, y=PC2, 
+# Seasonal plot
+seasp <- ggplot(sc) + 
+   geom_point(aes(x=PC1, y=PC2, 
                  shape = Season, 
                  color = ClusterNumber), 
              size=1.5, 
@@ -66,9 +72,34 @@ ggplot(sc) +
                       discrete = TRUE,
                       option = "A") +
   theme(legend.position = 'none') +
-  xlab("First Principle Component") +
-  ylab("Second Principle Component") +
+  xlab("First Principal Component") +
+  ylab("Second Principal Component") +
   theme_classic()
+
+# Cluster plot
+clusp <- ggplot(sc) + 
+   geom_point(aes(x=PC1, y=PC2, 
+                 color = ClusterNumber), 
+             size=1.5, 
+             show.legend = TRUE) +
+  geom_mark_ellipse(aes(x = PC1, y = PC2, 
+                        fill = ClusterNumber, 
+                        label = ClusterNumber),
+                    colour = "black",
+                    show.legend = FALSE) +
+  scale_color_viridis(begin = 0.1,
+                      end = 0.9,
+                      discrete = TRUE,
+                      option = "A") +
+  theme(legend.position = 'none') +
+  xlab("First Principal Component") +
+  ylab("Second Principal Component") +
+  theme_classic()
+
+grid.arrange(a, b, c, d, nrow=2)
+grid.arrange(clusp, corrcircle, seasp, nrow = 2)
+
+
 
 library(corrplot)
 corr <- read.csv(file = "clustercorr.csv", header = TRUE)
