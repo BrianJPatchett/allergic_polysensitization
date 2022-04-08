@@ -49,7 +49,8 @@ d <- fviz_contrib(gen.pca,
              fill = "Grey") +
   ggtitle(label = "Contributions to the Fourth Principal Component")
 
-# Princomp is helpful to get the new PCA space
+# you might wonder why I used two different functions for the same thing? PCA was giving me an error and I was too lazy to figure out why I just switched it to princomp
+# don't @ me
 sc.pca <- princomp(clus[,1:25])
 sc.df <- as.data.frame(sc.pca$x)
 labels <- clus[,26:27]
