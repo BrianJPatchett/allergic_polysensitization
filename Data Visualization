@@ -1,3 +1,8 @@
+### Data visualization ###
+# This is the code used to generate the line plot for APS vs FEF25-75 percent predicted. 
+# the layout of "fefaps.csv" is one column of APS and another column of the corresponding patient's FEF25-75. 
+# The database specific codes (i.e. extracting the necessary columns) were omitted for the sake of clarity
+
 library(ggplot2)
 library(dplyr)
 library(ggpmisc)
@@ -6,7 +11,7 @@ library(gridExtra)
 set.seed(123)
 
 #Get data
-datafef <- read.csv(file="fefaps.csv", header = TRUE, stringsAsFactors = FALSE)
+datafef <- read.csv(file="fefaps.csv", header = TRUE)
 
 #Print a Linear Model
 lm_summary <- summary(lm(formula = FEF ~ APS, data = datafef))
