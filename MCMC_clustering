@@ -1,0 +1,57 @@
+## Clustering ##
+
+library(NPflow)
+library(data.table)
+library(ggplot2)
+
+raw_data <- read.csv(file="completekmc.csv", header = TRUE)
+data <- as.data.frame(log(raw_data+1))
+
+pca <- princomp(raw_data)
+sc.df <- as.data.frame(pca[["scores"]])
+sc.df <- sc.df[, 1:4]
+t_sc.df <- transpose(sc.df)
+t <- as.matrix(t_sc.df)
+
+# Set parameters of G0
+d<-4
+hyperG0 <- list()
+hyperG0[["mu"]] <- rep(0,d)
+hyperG0[["kappa"]] <- 0.001
+hyperG0[["nu"]] <- d+2
+hyperG0[["lambda"]] <- diag(d)/10
+# hyperprior on the Scale parameter of DPM
+a <- 0.00000001
+b <- 0.00000001
+# Number of iterations
+N <- 30
+# do some plots
+doPlot <- TRUE
+nbclust_init <- 10
+
+## Data
+########
+library(ggplot2)
+p <- (ggplot(data.frame("X"=z[1,], "Y"=z[2,]), aes(x=X, y=Y))
+      + geom_point()
+      + ggtitle("Toy example Data"))
+p
+  # Gibbs sampler for Dirichlet Process Mixtures
+MCMCsample <- DPMGibbsN(t, hyperG0, a, b, N=1500, doPlot, nbclust_init, plotevery=200,
+                          gg.add=list(theme_bw(),
+                                      guides(shape=guide_legend(override.aes = list(fill="grey45")))),
+                          diagVar=TRUE)
+s <- summary(MCMCsample, posterior_approx=TRUE, burnin = 1000, thin=5)
+F1 <- FmeasureC(pred=s$point_estim$c_est, ref=c)
+F1
+MCMCsample2 <- DPMGibbsN_SeqPrior(t, prior_inform=s$param_posterior,
+                                    hyperG0, N=1500,
+                                    add.vagueprior = TRUE,
+                                    doPlot=TRUE, plotevery=100,
+                                    nbclust_init=nbclust_init,
+                                    gg.add=list(theme_bw(),
+                                                guides(shape=guide_legend(override.aes = list(fill="grey45")))),
+                                    diagVar=TRUE)
+s2 <- summary(MCMCsample2, burnin = 500, thin=5)
+F2 <- FmeasureC(pred=s2$point_estim$c_est, ref=c)
+F2
