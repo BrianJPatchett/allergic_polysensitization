@@ -29,7 +29,7 @@ b <- 0.00000001
 N <- 30
 # do some plots
 doPlot <- TRUE
-nbclust_init <- 10
+nbclust_init <- 20
 
 # Gibbs sampler for Dirichlet Process Mixtures
 MCMCsample <- DPMGibbsN(t, hyperG0, a, b, N=1500, doPlot, nbclust_init, plotevery=200,
