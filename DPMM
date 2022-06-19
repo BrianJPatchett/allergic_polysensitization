@@ -1,7 +1,7 @@
 ### CLUSTERING ###
 # As with the visualization code, I'm leaving this as bare bones as possible for the sake of clarity. 
 # Obviously, make sure to -pip install pandas and numpy before importing
-# allergen_custering.csv is a 509 x 25 matrix where rows are patients and columns are allergens.
+# allergen_custering.csv is a 509 x 25 matrix where rows are patients and columns are allergens. data are available upon request,
 
 import pandas as pd
 import numpy as np
