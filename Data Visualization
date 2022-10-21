@@ -3,10 +3,12 @@
 # the layout of "fefaps.csv" is one column of APS and another column of the corresponding patient's FEF25-75. 
 # The database specific codes (i.e. extracting the necessary columns) were omitted for the sake of clarity
 
-library(ggplot2)
-library(dplyr)
-library(ggpmisc)
-library(gridExtra)
+suppressPackageStartupMessages({
+  library(ggplot2)
+  library(dplyr)
+  library(gridExtra)
+  library(car)
+  library(ggpmisc)})
 
 set.seed(123)
 
@@ -26,17 +28,22 @@ fef.summary <- datafef %>%
   )
 
 #Make Line Plot
-fef_line <- ggplot(fef.summary, aes(x=APS, y=FEF)) + 
-  geom_point() +
+fef_line <- ggplot(df.summary, aes(x=(APS), y=FEF)) +
+  geom_point()+
   geom_errorbar(aes(ymin=FEF-sd, ymax=FEF+sd), width=.2,
-    position=position_dodge(0.05)) +
+                position=position_dodge(0.05)) +
   stat_smooth(data = datafef, formula = y ~ x, method = "lm", fullrange = TRUE) +
-    eq.with.lhs = "italic(hat((y))~'='~",
-    aes(label = paste(..eq.label.., ..rr.label.., sep = "*plain(\",")~")),
-    parse = TRUE) +
+  stat_poly_eq(data = datafef, formula = y ~ x, 
+               eq.with.lhs = "italic(hat(y))~`=`~",
+               aes(label = paste(..eq.label.., ..rr.label.., sep = "*plain(\",\")~")),
+               label.x.npc = "right",
+               parse = TRUE,
+               size = 6) +
   ylab(expression("FEF"[25-75] * " Percent Predicted")) +
   xlab('Mean APS of Each Cluster') +
-  theme_classic()
-
+  labs(tag = "2b)") +
+  theme(axis.title = element_text(size = 18),
+        axis.text = element_text(size = 15),
+        plot.tag = element_text()) 
 fef_line
   
