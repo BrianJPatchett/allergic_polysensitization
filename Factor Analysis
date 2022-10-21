@@ -9,104 +9,72 @@ clus <- read.csv(file="completekmc.csv", header = TRUE)
 clus$ClusterNumber <- as.factor(clus$ClusterNumber)
 clus$Season <- as.factor(clus$Season)
 
-# PCA for the graphs
-gen.pca <- PCA(clus[,1:25], graph = FALSE)
+gen.pca <- PCA(clus[,3:27], graph = FALSE)
 
 # Correlation Circle
-corrcircle <- fviz_pca_var(gen.pca, col.var="contrib",
-             repel = TRUE,
-             max.overlaps = 1) +
-  scale_color_viridis(end = 0.9,
-    option = "A")
-
+corrcircle <- fviz_pca_var(gen.pca,
+                           repel = TRUE,
+                           max.overlaps = 1) +
+  labs(tag = "1d)") +
+  ggtitle(label = "PCA Correlation Circle of Sensitizations")
+  
 # Contributions of variables to PC1
 a <- fviz_contrib(gen.pca, 
-             choice = "var", 
-             axes = 1, 
-             top = 25, 
-             fill = "Grey") +
-  ggtitle(label = "Contributions to the First Principal Component")
+                  choice = "var", 
+                  axes = 1, 
+                  top = 25, 
+                  fill = "Grey") +
+  ggtitle(label = "Contributions to the First Principal Component") +
+  labs(tag = "1b)") +
+  theme(plot.tag = element_text(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 15))
 
 # Contributions of variables to PC2
 b <- fviz_contrib(gen.pca, 
-             choice = "var", 
-             axes = 2, 
-             top = 25, 
-             fill = "Grey") +
-  ggtitle(label = "Contributions to the Second Principal Component")
-
-c <- fviz_contrib(gen.pca, 
-             choice = "var", 
-             axes = 3, 
-             top = 25, 
-             fill = "Grey") +
-  ggtitle(label = "Contributions to the Third Principal Component")
-
-d <- fviz_contrib(gen.pca, 
-             choice = "var", 
-             axes = 4, 
-             top = 25, 
-             fill = "Grey") +
-  ggtitle(label = "Contributions to the Fourth Principal Component")
+                  choice = "var", 
+                  axes = 2, 
+                  top = 25, 
+                  fill = "Grey") +
+  ggtitle(label = "Contributions to the Second Principal Component") +
+  labs(tag = "1c)") +
+  theme(plot.tag = element_text(),
+        axis.title = element_text(size = 15),
+        axis.text = element_text(size = 15))
 
 # use of princomp here is a relic of when I was still learning PCA.
-sc.pca <- princomp(clus[,1:25])
-sc.df <- as.data.frame(sc.pca$x)
-labels <- clus[,26:27]
+sc.pca <- princomp(clus[,3:27])
+sc.df <- as.data.frame(sc.pca[["scores"]])
+labels <- clus[,1:2]
 sc <- cbind(sc.df, labels)
-
-# Seasonal plot
-seasp <- ggplot(sc) + 
-   geom_point(aes(x=PC1, y=PC2, 
-                 shape = Season, 
-                 color = ClusterNumber), 
-             size=1.5, 
-             show.legend = TRUE) +
-  geom_mark_ellipse(aes(x = PC1, y = PC2, 
-                        fill = Season, 
-                        label = Season),
-                    colour = "black",
-                    show.legend = FALSE) +
-  scale_color_viridis(begin = 0.1,
-                      end = 0.9,
-                      discrete = TRUE,
-                      option = "A") +
-  theme(legend.position = 'none') +
-  xlab("First Principal Component") +
-  ylab("Second Principal Component") +
-  theme_classic()
 
 # Cluster plot
 clusp <- ggplot(sc) + 
-   geom_point(aes(x=PC1, y=PC2, 
+  geom_point(aes(x=Comp.1, y=Comp.2, 
                  color = ClusterNumber), 
              size=1.5, 
-             show.legend = TRUE) +
-  geom_mark_ellipse(aes(x = PC1, y = PC2, 
+             show.legend = FALSE) +
+  geom_mark_ellipse(aes(x = Comp.1, y = Comp.2, 
                         fill = ClusterNumber, 
-                        label = ClusterNumber),
+                        label = Season),
                     colour = "black",
+                    con.cap = 0,
                     show.legend = FALSE) +
   scale_color_viridis(begin = 0.1,
                       end = 0.9,
                       discrete = TRUE,
                       option = "A") +
-  theme(legend.position = 'none') +
-  xlab("First Principal Component") +
-  ylab("Second Principal Component") +
-  theme_classic()
-
-grid.arrange(a, b, c, d, nrow=2)
-grid.arrange(clusp, corrcircle, seasp, nrow = 2)
-
+  xlab("First Principal Component (Primarily Seasonal)") +
+  ylab("Second Principal Component (Primarily Perennial)") +
+  labs(tag = "1a)") +
+  theme(axis.title = element_text(size = 20),
+        axis.text=element_blank(),
+        axis.ticks = element_blank(),
+        plot.tag = element_text())
 
 
 library(corrplot)
 corr <- read.csv(file = "clustercorr.csv", header = TRUE)
+corr <- as.matrix(corr)
 M <- cor(corr)
-col1 <- colorRampPalette(magma(n = 100))
-corrplot(M, method = "color", 
-         order = "hclust", 
-         addrect = 3, 
-         col = colorRampPalette(magma(n=10))(100), 
-         addCoef.col = "BLACK")
+heatmap(M, hclustfun = function(d) hclust(d, method = "average"))
